@@ -303,6 +303,7 @@ hr {
   }
 
   .suicide-tile {
+    pointer-events: none;
     border-radius: $tile-border-radius;
     background: $tile-color;
     text-align: center;

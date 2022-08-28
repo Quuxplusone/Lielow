@@ -61,3 +61,14 @@ Util.isHumanStartPosition = function (position) {
 Util.isAIStartPosition = function (position) {
     return position.y == 1;
 };
+
+Util.doThisButNoFasterThan = function (timeoutMillis, task, completion) {
+    let deadlineMillis = Date.now() + timeoutMillis;
+    window.setTimeout(function () {
+        var result = task();
+        let remainingMillis = Math.max(deadlineMillis - Date.now(), 0);
+        window.setTimeout(function () {
+            completion(result);
+        }, remainingMillis);
+    }, 0);
+};

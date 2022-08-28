@@ -654,6 +654,7 @@ hr {
 }
 
 .suicide-tile {
+  pointer-events: none;
   border-radius: 3px;
   background: #eee4da;
   text-align: center;
@@ -1171,6 +1172,7 @@ hr {
   }
 
   .suicide-tile {
+    pointer-events: none;
     border-radius: 3px;
     background: #eee4da;
     text-align: center;
