@@ -15,6 +15,7 @@ HTMLActuator.prototype.actuate = function (grid, metadata) {
                 self.addTile(cell);
             });
         });
+        self.addSuicideTile(grid.suicideCell);
 
         if (metadata.lost) {
             self.messageContainer.classList.add("game-lost");
@@ -69,6 +70,23 @@ HTMLActuator.prototype.addTile = function (tile) {
         });
     } else {
         this.applyClasses(wrapper, classes);
+    }
+
+    // Add the inner part of the tile to the wrapper
+    wrapper.appendChild(inner);
+
+    // Put the tile on the board
+    this.tileContainer.appendChild(wrapper);
+};
+
+HTMLActuator.prototype.addSuicideTile = function (tile) {
+    var wrapper   = document.createElement("div");
+    var inner     = document.createElement("div");
+    this.applyClasses(wrapper, ["suicide-tile", "tile-position-99-99", "empty-cell"]);
+    inner.classList.add("tile-inner");
+
+    if (tile.highlightType !== null) {
+        wrapper.classList.add("tile-highlighted-" + tile.highlightType);
     }
 
     // Add the inner part of the tile to the wrapper

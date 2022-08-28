@@ -161,7 +161,7 @@ hr {
   background: #bbada0;
   border-radius: 6px;
   width: 500px;
-  height: 500px;
+  height: 561.25px;
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
   box-sizing: border-box;
@@ -247,6 +247,14 @@ hr {
 }
 .grid-cell:last-child {
   margin-right: 0;
+}
+
+.grid-suicide-cell {
+  width: 480px;
+  height: 51.25px;
+  float: left;
+  border-radius: 3px;
+  background: rgba(238, 228, 218, 0.35);
 }
 
 .tile-container {
@@ -645,6 +653,35 @@ hr {
   transform: translate(428px, 428px);
 }
 
+.suicide-tile {
+  border-radius: 3px;
+  background: #eee4da;
+  text-align: center;
+  font-weight: bold;
+  z-index: 10;
+  position: absolute;
+  -webkit-transform: translate(0, 490px);
+  -moz-transform: translate(0, 490px);
+  -ms-transform: translate(0, 490px);
+  transform: translate(0, 490px);
+}
+.suicide-tile, .suicide-tile .tile-inner {
+  width: 480px;
+  height: 52px;
+}
+.suicide-tile.tile-highlighted-light {
+  z-index: 20;
+}
+.suicide-tile.tile-highlighted-light .tile-inner {
+  background: #dea488;
+}
+.suicide-tile.tile-highlighted-dark {
+  z-index: 20;
+}
+.suicide-tile.tile-highlighted-dark .tile-inner {
+  background: sienna;
+}
+
 .tile {
   position: absolute;
   pointer-events: none;
@@ -809,7 +846,7 @@ hr {
     background: #bbada0;
     border-radius: 6px;
     width: 280px;
-    height: 280px;
+    height: 325.6666666667px;
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
     box-sizing: border-box;
@@ -895,6 +932,14 @@ hr {
   }
   .grid-cell:last-child {
     margin-right: 0;
+  }
+
+  .grid-suicide-cell {
+    width: 359.3333333333px;
+    height: 39.6666666667px;
+    float: left;
+    border-radius: 3px;
+    background: rgba(238, 228, 218, 0.35);
   }
 
   .tile-container {
@@ -1123,6 +1168,35 @@ hr {
     -moz-transform: translate(228px, 228px);
     -ms-transform: translate(228px, 228px);
     transform: translate(228px, 228px);
+  }
+
+  .suicide-tile {
+    border-radius: 3px;
+    background: #eee4da;
+    text-align: center;
+    font-weight: bold;
+    z-index: 10;
+    position: absolute;
+    -webkit-transform: translate(0, 365px);
+    -moz-transform: translate(0, 365px);
+    -ms-transform: translate(0, 365px);
+    transform: translate(0, 365px);
+  }
+  .suicide-tile, .suicide-tile .tile-inner {
+    width: 359px;
+    height: 40px;
+  }
+  .suicide-tile.tile-highlighted-light {
+    z-index: 20;
+  }
+  .suicide-tile.tile-highlighted-light .tile-inner {
+    background: #dea488;
+  }
+  .suicide-tile.tile-highlighted-dark {
+    z-index: 20;
+  }
+  .suicide-tile.tile-highlighted-dark .tile-inner {
+    background: sienna;
   }
 
   .game-message {

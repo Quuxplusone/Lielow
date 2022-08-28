@@ -77,55 +77,61 @@ KeyboardInputManager.prototype.listen = function () {
     self.touchStartPosition = {x: -1, y: -1};
     for (var x=0; x < 8; ++x) {
         for (var y=0; y < 8; ++y) {
-            let position = {x: x, y: y};
-            let button = document.querySelector(`.grid-position-${x+1}-${y+1}`);
-            console.assert(button);
-            button.x = position.x;
-            button.y = position.y;
-
-            var dispatch = function (source, target) {
-                if (Util.positionsEqual(target, source)) {
-                    self.emit("click", target);
-                }
-            };
-
-            button.addEventListener(this.eventTouchstart, function (event) {
-                if (event.touches.length >= 2) {
-                    self.touchStartPosition = {x: -1, y: -1};
-                    return;  // Ignore multitouch.
-                }
-                self.touchStartPosition = position;
-            });
-            button.addEventListener(this.eventTouchend, function (event) {
-                if (event.touches.length >= 1 || event.changedTouches.length != 1) {
-                    self.touchStartPosition = {x: -1, y: -1};
-                    return;  // Ignore if the touch is still going on.
-                }
-                var changedTouch = event.changedTouches[0];
-                var element = document.elementFromPoint(changedTouch.clientX, changedTouch.clientY);
-                var position = {x: element.x, y: element.y};
-                var source = self.touchStartPosition;
-                self.touchStartPosition = {x: -1, y: -1};
-                dispatch(source, position);
-
-                // The browser might generate a "click" event for this, if we let it. Don't let it.
-                event.preventDefault();
-            });
-
-            button.addEventListener("mousedown", function (event) {
-                self.touchStartPosition = position;
-            });
-            button.addEventListener("mouseup", function (event) {
-                var source = self.touchStartPosition;
-                self.touchStartPosition = {x: -1, y: -1};
-                dispatch(source, position);
-            });
+            self.addTileEventListeners(x, y);
         }
     }
+    self.addTileEventListeners(98, 98);
 
     // Respond to button presses
     this.bindButtonPress(".retry-button", this.restart);
     this.bindButtonPress(".restart-button", this.restart);
+};
+
+KeyboardInputManager.prototype.addTileEventListeners = function (x, y) {
+    var self = this;
+    let position = {x: x, y: y};
+    let button = document.querySelector(`.grid-position-${x+1}-${y+1}`);
+    console.assert(button);
+    button.x = position.x;
+    button.y = position.y;
+
+    var dispatch = function (source, target) {
+        if (Util.positionsEqual(target, source)) {
+            self.emit("click", target);
+        }
+    };
+
+    button.addEventListener(this.eventTouchstart, function (event) {
+        if (event.touches.length >= 2) {
+            self.touchStartPosition = {x: -1, y: -1};
+            return;  // Ignore multitouch.
+        }
+        self.touchStartPosition = position;
+    });
+    button.addEventListener(this.eventTouchend, function (event) {
+        if (event.touches.length >= 1 || event.changedTouches.length != 1) {
+            self.touchStartPosition = {x: -1, y: -1};
+            return;  // Ignore if the touch is still going on.
+        }
+        var changedTouch = event.changedTouches[0];
+        var element = document.elementFromPoint(changedTouch.clientX, changedTouch.clientY);
+        var position = {x: element.x, y: element.y};
+        var source = self.touchStartPosition;
+        self.touchStartPosition = {x: -1, y: -1};
+        dispatch(source, position);
+
+        // The browser might generate a "click" event for this, if we let it. Don't let it.
+        event.preventDefault();
+    });
+
+    button.addEventListener("mousedown", function (event) {
+        self.touchStartPosition = position;
+    });
+    button.addEventListener("mouseup", function (event) {
+        var source = self.touchStartPosition;
+        self.touchStartPosition = {x: -1, y: -1};
+        dispatch(source, position);
+    });
 };
 
 KeyboardInputManager.prototype.restart = function (event) {

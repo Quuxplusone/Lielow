@@ -173,7 +173,7 @@ hr {
     background: $game-container-background;
     border-radius: $tile-border-radius * 2;
     width: $field-width;
-    height: $field-width;
+    height: $field-width + $tile-size + $grid-spacing;
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
     box-sizing: border-box;
@@ -267,6 +267,16 @@ hr {
     }
   }
 
+  .grid-suicide-cell {
+    width: 8 * $tile-size + 7 * $grid-spacing;
+    height: $tile-size;
+    float: left;
+
+    border-radius: $tile-border-radius;
+
+    background: rgba($tile-color, .35);
+  }
+
   .tile-container {
     position: absolute;
     z-index: 2;
@@ -288,6 +298,36 @@ hr {
           $yPos: floor(($tile-size + $grid-spacing) * ($y - 1));
           @include transform(translate($xPos, $yPos));
         }
+      }
+    }
+  }
+
+  .suicide-tile {
+    border-radius: $tile-border-radius;
+    background: $tile-color;
+    text-align: center;
+    font-weight: bold;
+    z-index: 10;
+    position: absolute;
+    $xPos: 0;
+    $yPos: floor(($tile-size + $grid-spacing) * 8);
+    @include transform(translate($xPos, $yPos));
+
+    &, .tile-inner {
+      width: floor(($tile-size + $grid-spacing) * 7) + ceil($tile-size);
+      height: ceil($tile-size);
+    }
+
+    &.tile-highlighted-light {
+      z-index: 20;
+      .tile-inner {
+        background: $light-highlight-color;
+      }
+    }
+    &.tile-highlighted-dark {
+      z-index: 20;
+      .tile-inner {
+        background: $dark-highlight-color;
       }
     }
   }

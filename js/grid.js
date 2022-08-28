@@ -4,6 +4,7 @@ Grid.newGame = function () {
     var self = new Grid();
     self.isAITurn = (Math.round(Math.random()) == 0);
     self.cells = self.cellsFromState(null);
+    self.suicideCell = new Tile({x: 98, y: 98}, null, null, false);
     self.winner = null;
 
     for (var x = 0; x < 8; ++x) {
@@ -25,6 +26,7 @@ Grid.fromPreviousState = function (previousState) {
     var self = new Grid();
     self.isAITurn = previousState.isAITurn;
     self.cells = self.cellsFromState(previousState.cells);
+    self.suicideCell = Tile.fromPreviousState(previousState.suicideCell);
     self.winner = null;
     return self;
 };
@@ -51,6 +53,7 @@ Grid.prototype.serialize = function () {
     return {
         cells: cellState,
         isAITurn: this.isAITurn,
+        suicideCell: this.suicideCell.serialize(),
         winner: null,
     };
 };
@@ -59,6 +62,7 @@ Grid.prototype.clone = function () {
     var self = new Grid();
     self.isAITurn = this.isAITurn;
     self.cells = self.cellsFromState(this.cells);
+    self.suicideCell = Tile.fromPreviousState(this.suicideCell);
     self.winner = this.winner;
     return self;
 };
@@ -74,13 +78,15 @@ Grid.prototype.clearHighlights = function () {
             this.cells[x][y].highlightType = null;
         }
     }
+    this.suicideCell.highlightType = null;
 };
 
 Grid.prototype.highlightTile = function (highlightType, position) {
-    console.assert(Util.isWithinBounds(position));
-    if (position !== null) {
+    if (Util.isWithinBounds(position)) {
         var selectedTile = this.cells[position.x][position.y];
         selectedTile.highlightType = highlightType;
+    } else {
+        this.suicideCell.highlightType = highlightType;
     }
 };
 

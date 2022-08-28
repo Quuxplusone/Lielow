@@ -91,21 +91,24 @@ GameManager.prototype.arrow = function (direction) {
     if (this.isGameTerminated()) return; // Don't do anything if the game's over
 
     // Input UI states:
-    // 0: Still stepping the "selected tile" highlight region around the screen.
-    // 1: Have actually selected a tile (with one of my stacks on it).
-    // 2: Have indicated the (valid) space onto which to move that stack.
-    // The next step is to confirm the move, which puts us back into state 0.
-    if (this.inputState == 0) {
-        var d = Util.getVector(direction);
+    // 0: Still stepping the "select a stack" highlight region around the screen.
+    // 1: Have selected a stack; now selecting its target space.
+    var d = Util.getVector(direction);
+    if (this.inputState === 0) {
         this.highlightedTile = {
             x: Math.min(Math.max(0, this.highlightedTile.x + d.x), 7),
             y: Math.min(Math.max(0, this.highlightedTile.y + d.y), 7),
         };
-    } else if (this.inputState == 1) {
-        var d = Util.getVector(direction);
+    } else if (this.inputState === 1) {
+        // If suicide is legal in this direction, allow stepping onto the suicide cell.
+        var height = this.grid.at(this.selectedStack).height;
+        let minX = (this.selectedStack.x < height) ? -1 : 0;
+        let minY = (this.selectedStack.y < height) ? -1 : 0;
+        let maxX = (this.selectedStack.x > 7 - height) ? 8 : 7;
+        let maxY = (this.selectedStack.y > 7 - height) ? 8 : 7;
         this.highlightedTile = {
-            x: Math.min(Math.max(-1, this.highlightedTile.x + d.x), 8),
-            y: Math.min(Math.max(-1, this.highlightedTile.y + d.y), 8),
+            x: Math.min(Math.max(minX, this.highlightedTile.x + d.x), maxX),
+            y: Math.min(Math.max(minY, this.highlightedTile.y + d.y), maxY),
         };
     }
     this.actuate();
@@ -117,17 +120,25 @@ GameManager.prototype.enter = function (dummy) {
     // Input UI states:
     // 0: Still stepping the "select a stack" highlight region around the screen.
     // 1: Have selected a stack; now selecting its target space.
+
     if (this.inputState === 0) {
         var tile = this.grid.at(this.highlightedTile);
         if (tile.owner === 'human') {
-            this.selectedStack = {x: this.highlightedTile.x, y: this.highlightedTile.y};
+            this.selectedStack = {x: tile.x, y: tile.y};
             this.inputState = 1;
+        } else {
+            this.selectedStack = {x: -1, y: -1};
+            this.inputState = 0;
         }
     } else if (this.inputState === 1) {
-        if (Util.positionsEqual(this.highlightedTile, this.selectedStack)) {
-            this.inputState = 0;
-        } else if (this.grid.isLegalMove(this.selectedStack, this.highlightedTile)) {
+        if (this.grid.isLegalMove(this.selectedStack, this.highlightedTile)) {
             this.commitMoveForHuman(this.selectedStack, this.highlightedTile);
+        } else if (Util.isWithinBounds(this.highlightedTile) && this.grid.at(this.highlightedTile).owner === 'human') {
+            this.selectedStack = {x: tile.x, y: tile.y};
+            this.inputState = 1;
+        } else {
+            this.selectedStack = {x: -1, y: -1};
+            this.inputState = 0;
         }
     }
     this.actuate();
@@ -136,37 +147,27 @@ GameManager.prototype.enter = function (dummy) {
 GameManager.prototype.click = function (position) {
     if (this.isGameTerminated()) return; // Don't do anything if the game's over
 
-    if (this.inputState === 0) {
-        var tile = this.grid.at(position);
-        this.highlightedTile = {x: position.x, y: position.y};
-        if (tile.owner === 'human') {
-            this.selectedStack = {x: position.x, y: position.y};
-            this.inputState = 1;
-        } else {
-            this.selectedStack = {x: -1, y: -1};
-            this.inputState = 0;
-        }
-    } else if (this.inputState === 1) {
-        var tile = this.grid.at(position);
-        this.highlightedTile = {x: position.x, y: position.y};
-        if (tile.owner === 'human') {
-            this.selectedStack = {x: position.x, y: position.y};
-            this.inputState = 1;
-        } else if (this.grid.isLegalMove(this.selectedStack, this.highlightedTile)) {
-            this.commitMoveForHuman(this.selectedStack, this.highlightedTile);
-        } else {
-            // do nothing
-        }
+    // Clicking on a tile is like navigating to it and hitting "Enter",
+    // except that we should take extra care not to highlight the suicide tile
+    // if the selected stack isn't able to reach it.
+
+    if (!Util.isWithinBounds(position)) {
+        if (this.inputState === 0) return;
+        if (!this.grid.isLegalMove(this.selectedStack, position)) return;
     }
-    this.actuate();
+
+    this.highlightedTile = {x: position.x, y: position.y};
+    this.enter(null);
 };
 
 GameManager.prototype.commitMoveForHuman = function (source, target) {
     this.grid.commitMove(source, target);
-    this.grid.at(target).previousPosition = {x: source.x, y: source.y};
+    if (Util.isWithinBounds(target)) {
+        this.grid.at(target).previousPosition = {x: source.x, y: source.y};
+    }
     this.winner = this.grid.winner;
 
-    this.highlightedTile = target;
+    this.highlightedTile = Util.isWithinBounds(target) ? target : source;
     this.inputState = 0;
 
     if (this.winner === null) {
