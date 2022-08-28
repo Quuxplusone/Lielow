@@ -1,0 +1,26 @@
+CACHE MANIFEST
+
+# Adds the ability to play the game offline.
+
+# Main pages
+index.html
+
+# CSS
+style/main.css
+
+# Other resources
+favicon.ico
+
+# JavaScript
+js/animframe_polyfill.js
+js/bind_polyfill.js
+js/classlist_polyfill.js
+js/game_manager.js
+js/grid.js
+js/html_actuator.js
+js/keyboard_input_manager.js
+js/local_storage_manager.js
+js/tile.js
+
+NETWORK:
+*
