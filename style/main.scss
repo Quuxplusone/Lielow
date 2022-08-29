@@ -446,7 +446,6 @@ hr {
   // Redefine variables for smaller screens
   $field-width: 280px !global;
   $grid-spacing: 6px !global;
-  $grid-row-cells: 6 !global;
   $tile-size: ($field-width - $grid-spacing * ($grid-row-cells + 1)) / $grid-row-cells !global;
   $tile-border-radius: 3px !global;
   $game-container-margin-top: 17px !global;
