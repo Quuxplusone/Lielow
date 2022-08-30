@@ -54,7 +54,7 @@ GameManager.prototype.setup = function () {
     this.inputState = 0;
     this.highlightedTile = {x: 2, y: 2};
 
-    if (this.grid.isAITurn) {
+    if (this.grid.isAITurn && !window.noai) {
         var self = this;
         Util.doThisButNoFasterThan(500, function () {
             return self.aiPlayer.chooseMove(self);
@@ -118,6 +118,8 @@ GameManager.prototype.arrow = function (direction) {
 GameManager.prototype.enter = function (dummy) {
     if (this.isGameTerminated()) return; // Don't do anything if the game's over
 
+    let who = this.grid.isAITurn ? 'ai' : 'human';
+
     // Input UI states:
     // 0: Still stepping the "select a stack" highlight region around the screen.
     // 1: Have selected a stack; now selecting its target space.
@@ -125,7 +127,7 @@ GameManager.prototype.enter = function (dummy) {
     var position = {x: this.highlightedTile.x, y: this.highlightedTile.y};
     if (this.inputState === 0) {
         var tile = this.grid.at(position);
-        if (tile.owner === 'human') {
+        if (tile.owner === who) {
             this.selectedStack = position;
             this.inputState = 1;
         } else {
@@ -135,7 +137,7 @@ GameManager.prototype.enter = function (dummy) {
     } else if (this.inputState === 1) {
         if (this.grid.isLegalMove(this.selectedStack, this.highlightedTile)) {
             this.commitMoveForHuman(this.selectedStack, this.highlightedTile);
-        } else if (Util.isWithinBounds(position) && this.grid.at(position).owner === 'human') {
+        } else if (Util.isWithinBounds(position) && this.grid.at(position).owner === who) {
             this.selectedStack = position;
             this.inputState = 1;
         } else {
@@ -173,13 +175,17 @@ GameManager.prototype.commitMoveForHuman = function (source, target) {
     this.inputState = 0;
 
     if (this.winner === null) {
-        var self = this;
-        Util.doThisButNoFasterThan(500, function () {
-            return self.aiPlayer.chooseMove(self);
-        }, function (m) {
-            self.commitMoveForAI(m.source, m.target);
-            self.actuate();
-        });
+        if (window.noai) {
+            this.actuate();
+        } else {
+            var self = this;
+            Util.doThisButNoFasterThan(500, function () {
+                return self.aiPlayer.chooseMove(self);
+            }, function (m) {
+                self.commitMoveForAI(m.source, m.target);
+                self.actuate();
+            });
+        }
     }
 };
 
