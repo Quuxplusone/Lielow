@@ -54,6 +54,12 @@ GameManager.prototype.setup = function () {
     this.inputState = 0;
     this.highlightedTile = {x: 2, y: 2};
 
+    this.setupCheatCallback();
+
+    this.proceedToNextTurn();
+};
+
+GameManager.prototype.proceedToNextTurn = function () {
     if (this.grid.isAITurn && !window.noai) {
         var self = this;
         Util.doThisButNoFasterThan(500, function () {
@@ -165,6 +171,9 @@ GameManager.prototype.click = function (position) {
 };
 
 GameManager.prototype.commitMoveForHuman = function (source, target) {
+
+    window.gameTranscript.push(Util.moveToString(source, target));
+
     this.grid.commitMove(source, target);
     if (Util.isWithinBounds(target)) {
         this.grid.at(target).previousPosition = {x: source.x, y: source.y};
@@ -175,17 +184,7 @@ GameManager.prototype.commitMoveForHuman = function (source, target) {
     this.inputState = 0;
 
     if (this.winner === null) {
-        if (window.noai) {
-            this.actuate();
-        } else {
-            var self = this;
-            Util.doThisButNoFasterThan(500, function () {
-                return self.aiPlayer.chooseMove(self);
-            }, function (m) {
-                self.commitMoveForAI(m.source, m.target);
-                self.actuate();
-            });
-        }
+        this.proceedToNextTurn();
     }
 };
 
@@ -195,4 +194,23 @@ GameManager.prototype.commitMoveForAI = function (source, target) {
         this.grid.at(target).previousPosition = {x: source.x, y: source.y};
     }
     this.winner = this.grid.winner;
+};
+
+GameManager.prototype.setupCheatCallback = function () {
+    var self = this;
+    window.gameTranscript = [];
+    window.replayTranscript = function () {
+        let moves = window.gameTranscript;
+        self.grid = Grid.newGame();
+        self.aiPlayer = AIPlayer.newGame();
+        self.winner = null;
+        for (var i = 0; i < moves.length; ++i) {
+            let m = Util.stringToMove(moves[i]);
+            if (self.grid.isLegalMove(m.source, m.target)) {
+                self.grid.commitMove(m.source, m.target);
+            }
+        }
+        window.gameTranscript = moves;
+        self.proceedToNextTurn();
+    };
 };

@@ -48,6 +48,24 @@ Util.isAIStartPosition = function (position) {
     return position.y == 1;
 };
 
+Util.moveToString = function (source, target) {
+    console.assert(Util.isWithinBounds(source));
+    let ss = "abcdefgh"[source.x] + "87654321"[source.y];
+    let ts = Util.isWithinBounds(target) ?
+        "abcdefgh"[target.x] + "87654321"[target.y] :
+        "xx";
+    return ss + ">" + ts;
+};
+
+Util.stringToMove = function (s) {
+    if (s.length !== 5 || s[2] !== '>') {
+        return { source: {x: -1, y: -1}, target: {x: -1, y: -1} };
+    }
+    let source = { x: "abcdefghx".indexOf(s[0]), y: "87654321x".indexOf(s[1]) };
+    let target = { x: "abcdefghx".indexOf(s[3]), y: "87654321x".indexOf(s[4]) };
+    return { source: source, target: target };
+};
+
 Util.doThisButNoFasterThan = function (timeoutMillis, task, completion) {
     let deadlineMillis = Date.now() + timeoutMillis;
     window.setTimeout(function () {
