@@ -94,7 +94,7 @@ AIPlayer.prototype.negamax = function (depth, grid, alpha, beta) {
             // If we have a winning move, we should take it, specifically.
             return Infinity;
         }
-        let score = -this.negamax(depth - 1, newgrid, -beta, -alpha);
+        let score = Math.min(Math.max(alpha, -this.negamax(depth - 1, newgrid, -beta, -alpha)), beta);
         if (score > bestScore) {
             bestScore = score;
             if (score > alpha) {
