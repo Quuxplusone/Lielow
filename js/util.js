@@ -40,20 +40,6 @@ Util.isWithinBounds = function (position) {
            0 <= position.y && position.y <= 7;
 };
 
-Util.neighborsOf = function (position) {
-    var result = [];
-    if (position.x > 0) result.push({ x: position.x-1, y: position.y });
-    if (position.x < 5) result.push({ x: position.x+1, y: position.y });
-    if (position.y > 0) result.push({ x: position.x, y: position.y-1 });
-    if (position.y < 5) result.push({ x: position.x, y: position.y+1 });
-    return result;
-};
-
-Util.notme = function (who) {
-    console.assert(who === 'ai' || who === 'human');
-    return (who === 'ai') ? 'human' : 'ai';
-};
-
 Util.isHumanStartPosition = function (position) {
     return position.y == 6;
 };
