@@ -39,7 +39,11 @@ AIPlayer.prototype.legalMoves = function (grid) {
                 ];
                 for (var i = 0; i < 8; ++i) {
                     if (Util.isWithinBounds(targets[i]) && grid.isLegalMove(source, targets[i])) {
-                        moves.push({source: source, target: targets[i]});
+                        if (grid.at(targets[i]).owner !== null) {
+                            moves.unshift({source: source, target: targets[i]});
+                        } else {
+                            moves.push({source: source, target: targets[i]});
+                        }
                     }
                 }
                 var suicide = {x: -1, y: -1};
@@ -84,7 +88,6 @@ AIPlayer.prototype.negamax = function (depth, grid, alpha, beta) {
         console.assert(grid.winner !== null);
         return this.staticEvaluate(grid);
     }
-    Util.shuffleArray(moves);
     var bestScore = -beta;
     for (var i = 0; i < moves.length; ++i) {
         let m = moves[i];
@@ -113,25 +116,33 @@ AIPlayer.prototype.chooseMove = function (gameManager) {
     var grid = gameManager.grid;
 
     var moves = this.legalMoves(grid);
-    Util.shuffleArray(moves);
-    let startMillis = Date.now();
+    let deadline = Date.now() + 500; // half a second
 
-    var movesAndGrids = [];
-    for (var i = 0; i < moves.length; ++i) {
+    let estimates = [];
+    const n = moves.length;
+    for (let i = 0; i < n; ++i) {
         let m = moves[i];
-        var newgrid = Grid.fromPreviousState(grid);
+        let newgrid = Grid.fromPreviousState(grid);
         newgrid.commitMove(m.source, m.target);
-        movesAndGrids.push({m: m, g: newgrid});
+        estimates.push({
+            m: m,
+            g: newgrid,
+            score: -self.negamax(2, newgrid, -1e20, +1e20),
+        });
     }
-    var bestMG = Util.maxByMetric(movesAndGrids, function (mg) {
-        let score = -self.negamax(2, mg.g, -1e20, +1e20);
-        return score;
-    });
-    movesAndGrids = [bestMG].concat(movesAndGrids);
-    bestMG = Util.maxByMetric(movesAndGrids, function (mg) {
-        if (Date.now() - startMillis >= 500) return -Infinity;
-        let score = -self.negamax(3, mg.g, -1e20, +1e20);
-        return score;
-    });
-    return bestMG.m;
+    estimates.sort((a, b) => (b.score - a.score));
+    for (let depth = 3; Date.now() < deadline; ++depth) {
+        let newEstimates = [];
+        for (let i = 0; i < n; ++i) {
+            newEstimates.push({
+                m: estimates[i].m,
+                g: estimates[i].g,
+                score: -self.negamax(depth, estimates[i].g, -1e20, +1e20),
+            });
+            if (Date.now() >= deadline) break;
+        }
+        estimates = newEstimates;
+        estimates.sort((a, b) => (b.score - a.score));
+    }
+    return estimates[0].m;
 };
