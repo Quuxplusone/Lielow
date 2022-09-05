@@ -85,7 +85,7 @@ AIPlayer.prototype.negamax = function (depth, grid, alpha, beta) {
         return this.staticEvaluate(grid);
     }
     Util.shuffleArray(moves);
-    var bestScore = -Infinity;
+    var bestScore = -beta;
     for (var i = 0; i < moves.length; ++i) {
         let m = moves[i];
         var newgrid = Grid.fromPreviousState(grid);
