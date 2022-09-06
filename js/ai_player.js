@@ -127,11 +127,11 @@ AIPlayer.prototype.chooseMove = function (gameManager) {
         estimates.push({
             m: m,
             g: newgrid,
-            score: -self.negamax(2, newgrid, -1e20, +1e20),
+            score: -self.negamax(1, newgrid, -1e20, +1e20),
         });
     }
     estimates.sort((a, b) => (b.score - a.score));
-    for (let depth = 3; Date.now() < deadline; ++depth) {
+    for (let depth = 2; Date.now() < deadline; ++depth) {
         let newEstimates = [];
         for (let i = 0; i < n; ++i) {
             newEstimates.push({
