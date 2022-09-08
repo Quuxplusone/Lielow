@@ -62,12 +62,13 @@ GameManager.prototype.setup = function () {
 GameManager.prototype.proceedToNextTurn = function () {
     if (this.grid.isAITurn && !window.noai) {
         var self = this;
-        Util.doThisButNoFasterThan(500, function () {
-            return self.aiPlayer.chooseMove(self);
-        }, function (m) {
+        // The piece-sliding-speed transition takes 200ms.
+        // Make sure it's done, before we block the UI thread with AI stuff.
+        window.setTimeout(function () {
+            let m = self.aiPlayer.chooseMove(self);
             self.commitMoveForAI(m.source, m.target);
             self.actuate();
-        });
+        }, 220);
     } else {
         this.actuate();
     }
